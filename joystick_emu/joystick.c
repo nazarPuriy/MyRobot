@@ -59,7 +59,7 @@ void *joystick_emu(void *vargp) {
     while (1) {
 
         scanf("%c", &tecla);
-        switch (tecla) {
+        switch(tecla){
             case 0x0A:
             case 0x0D:
                 continue; //omitir el retorno, yendo directamente a la siguiente iteracion del while.
@@ -87,6 +87,8 @@ void *joystick_emu(void *vargp) {
             case 'q':
                 estado = Quit;
                 break;
+            default:
+                estado = Ninguno;
         }
         pthread_mutex_lock(joystick_mutex);
         Estado_actual = estado;

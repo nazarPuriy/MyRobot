@@ -55,8 +55,7 @@ int dyn_read_byte(uint8_t module_id, DYN_REG_t reg_addr, uint8_t *reg_read_val) 
 }
 
 /**
- * Multi-byte write instruction
- *
+ * Multi-byte write instruction *
  * This function sends a write instruction starting at a given address position
  * with a given length for a dynamixel module.
  *
@@ -67,7 +66,23 @@ int dyn_read_byte(uint8_t module_id, DYN_REG_t reg_addr, uint8_t *reg_read_val) 
  * @return Error code to be treated at higher levels.
  */
 int dyn_write(uint8_t module_id, DYN_REG_t reg_addr, uint8_t *val, uint8_t len) {
-    //TODO: If required, implement multiposition write
-    return 255;
+    if(len>15){
+        return 1; //Número de paràmetres no suportat.
+    }
+    uint8_t parameters[16];
+    struct RxReturn reply;
+
+    parameters[0] = reg_addr;
+    int count = 0;
+    for (count = 1; count < len + 1; count++) {
+        parameters[count] = val[count-1];
+    }
+
+    reply = RxTxPacket(module_id, len + 1, DYN_INSTR__WRITE, parameters);
+
+
+    return (reply.tx_err < 1) | reply.time_out;
 }
+
+
 

@@ -6,6 +6,7 @@
 
 #include "main.h"
 #include "dyn/dyn_app_common.h"
+#include "dyn/dyn_app_motors.h"
 #include "dyn_test/dyn_emu.h"
 #include "dyn_test/b_queue.h"
 #include "joystick_emu/joystick.h"
@@ -62,6 +63,9 @@ int main(void) {
             switch (estado) {
                 case Sw1:
                     printf("Boton Sw1 ('a') apretado\n");
+                    printf("OTRA");
+                    dyn_move(DYN_ID_MOTORL,50,true);
+                    dyn_move(DYN_ID_MOTORR,50,true);
                     dyn_led_control(1, 1); //Probaremos de encender el led del motor 2
                     printf("\n");
                     break;

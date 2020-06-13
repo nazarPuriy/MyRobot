@@ -12,7 +12,6 @@
 #include <stdint.h>
 
 int dyn_led_control(uint8_t id, bool val);
-
 int dyn_led_read(uint8_t id, uint8_t *val);
 
 

@@ -8,6 +8,8 @@ include_directories(dyn_test)
 include_directories(hal_dyn_uart)
 include_directories(joystick_emu)
 add_executable(p4_pc_joystick2_habitacion
+        dyn/dyn_app_motors.c
+        dyn/dyn_app_motors.h
         dyn/dyn_app_common.c
         dyn/dyn_app_common.h
         dyn/dyn_app_sensor.c
