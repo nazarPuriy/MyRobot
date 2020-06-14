@@ -15,5 +15,10 @@
  *   4.
  */
 #define DEBUG_LEVEL 3
-
+void acelerate(bool more,int quantity);
+void findWall();
+void littleLeft();
+void littleRight();
+void move();
+void a();
 #endif /* MAIN_H_ */

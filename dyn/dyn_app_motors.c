@@ -10,7 +10,7 @@
  */
 uint16_t VEL_MAX = 1023; //Velocitat màxima deguda a que utilitzem 10 bits per declarar aquesta.
 uint8_t VEL_MIN = 1; //Velocitat mínima per no entrar en el mode defiinit a 0.
-uint8_t VEL_CHANGE=50;
+uint8_t VEL_CHANGE=10;
 
 /**
  * Turn on a continous moving of the robot straight ahead or backwards
@@ -48,7 +48,7 @@ int robot_move_left(uint16_t speed, bool direction) {
  * Turn on a continous movement rotating to the direction given.
  *
  * @param[in] speed Defines the velocity of the motors
- * @param[in] direction true makes the robot rotate on counter clock wise false in clock wise.
+ * @param[in] direction true makes the robot rotate on clock wise false in clock wise.
  */
  int robot_rotate(uint16_t speed, bool direction){
     //Els motors han de tenir direcció oposada per girar.
@@ -61,7 +61,7 @@ int robot_move_left(uint16_t speed, bool direction) {
   *
  * @param [in] id Id of the dynamixel moduel
   */
- int addSpeed(uint8_t id){
+ int subSpeed(uint8_t id){
      if(!chk_id_motors(id)){return 1;}
      return changeSpeed(id,true,VEL_CHANGE);
  }
@@ -71,7 +71,7 @@ int robot_move_left(uint16_t speed, bool direction) {
 *
 * @param [in] id Id of the dynamixel moduel
 */
-int subSpeed(uint8_t id){
+int addSpeed(uint8_t id){
     if(!chk_id_motors(id)){return 1;}
     return changeSpeed(id,false,VEL_CHANGE);
 }

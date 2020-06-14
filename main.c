@@ -3,15 +3,20 @@
 #include <assert.h>
 #include <posicion.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <dyn/dyn_app_sensor.h>
 
 #include "main.h"
 #include "dyn/dyn_app_common.h"
 #include "dyn/dyn_app_motors.h"
+#include "dyn/dyn_app_sensor.h"
 #include "dyn_test/dyn_emu.h"
 #include "dyn_test/b_queue.h"
 #include "joystick_emu/joystick.h"
 #include "habitacion_001.h"
 
+void findWall();
+void move();
 uint8_t estado = Ninguno, estado_anterior = Ninguno, finalizar = 0;
 uint32_t indice;
 
@@ -52,6 +57,8 @@ int main(void) {
     printf("Pulsar 'q' para terminar, qualquier tecla para seguir\n");
     fflush(stdout);//	return 0;
 
+
+    move();
     while (estado != Quit) {
         if (simulator_finished) {
             break;
@@ -63,9 +70,6 @@ int main(void) {
             switch (estado) {
                 case Sw1:
                     printf("Boton Sw1 ('a') apretado\n");
-                    printf("OTRA");
-                    dyn_move(DYN_ID_MOTORL,50,true);
-                    dyn_move(DYN_ID_MOTORR,50,true);
                     dyn_led_control(1, 1); //Probaremos de encender el led del motor 2
                     printf("\n");
                     break;
@@ -123,3 +127,72 @@ int main(void) {
     printf("Programa terminado\n");
     fflush(stdout);
 }
+
+void acelerate(bool more,int quantity){
+    printf("\n\n\nACELERATING\n");
+    uint8_t * center;
+    bool balance;
+    //Sumem fins arribar velocitat 100.
+    int i;
+    for(i=0; i<quantity; i++){
+        dyn_sensor_read_center(3,center);
+        if(*center<10){
+            dyn_move(DYN_ID_MOTORL,0,false);
+            dyn_move(DYN_ID_MOTORR,0,false);
+            return;
+        }
+        if(balance){
+            addSpeed(DYN_ID_MOTORL);
+            addSpeed(DYN_ID_MOTORR);
+            balance = false;
+        }else{
+            addSpeed(DYN_ID_MOTORR);
+            addSpeed(DYN_ID_MOTORL);
+            balance = true;
+        }
+    }
+}
+
+void findWall(){
+    uint8_t* centerr;
+    (*centerr) = 20;
+
+    acelerate(true,10);
+    printf("\n\n\nMoving straight\n");
+    while(1){
+        dyn_sensor_read_center(3,centerr);
+
+        printf("DISTANCE CENTER%d: ",*centerr );
+        if(*centerr<10){
+
+            printf("\nPOTATO\n");
+        }
+    }
+
+}
+
+void littleLeft(){
+
+}
+
+void littleRight(){
+
+}
+
+void move(){
+    printf("\n\n\n Movement starting\n");
+    uint8_t* center;
+    uint8_t* right;
+    uint8_t* left;
+    //Comprovem que estigui quiet
+    dyn_move(DYN_ID_MOTORL,0,false);
+    dyn_move(DYN_ID_MOTORR,0,false);
+
+    printf("\n\n\n Going to find a wall\n");
+    findWall();
+
+
+
+
+}
+
