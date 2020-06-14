@@ -130,42 +130,101 @@ int main(void) {
 
 void acelerate(bool more,int quantity){
     printf("\n\n\nACELERATING\n");
-    uint8_t * center;
+    uint8_t center;
+    //Sumem fins arribar velocitat quantity*10;
     bool balance;
-    //Sumem fins arribar velocitat 100.
     int i;
     for(i=0; i<quantity; i++){
-        dyn_sensor_read_center(3,center);
-        if(*center<10){
+        dyn_sensor_read_center(3,&center);
+        //Mirem sempre que no anem a col·lisionar.
+        if(center<10){
             dyn_move(DYN_ID_MOTORL,0,false);
             dyn_move(DYN_ID_MOTORR,0,false);
             return;
         }
+
         if(balance){
-            addSpeed(DYN_ID_MOTORL);
-            addSpeed(DYN_ID_MOTORR);
+            if(more){
+                addSpeed(DYN_ID_MOTORL);
+                addSpeed(DYN_ID_MOTORR);
+            }else{
+                subSpeed(DYN_ID_MOTORL);
+                subSpeed(DYN_ID_MOTORR);
+            }
             balance = false;
         }else{
-            addSpeed(DYN_ID_MOTORR);
-            addSpeed(DYN_ID_MOTORL);
+            if(more){
+                addSpeed(DYN_ID_MOTORR);
+                addSpeed(DYN_ID_MOTORL);
+            }else{
+                subSpeed(DYN_ID_MOTORL);
+                subSpeed(DYN_ID_MOTORR);
+            }
             balance = true;
         }
     }
 }
 
+
+void adhere(){
+    uint8_t center;
+    uint8_t right;
+    uint8_t left;
+    uint16_t motorl;
+    uint16_t motorr;
+    bool dirr;
+    bool dirl;
+    bool straight;
+    subSpeed(DYN_ID_MOTORR);
+    bool willsmith;
+    while(willsmith){
+        dyn_motor_read_speed(DYN_ID_MOTORL, &motorl, &dirl);
+        dyn_motor_read_speed(DYN_ID_MOTORR, &motorr, &dirr);
+        dyn_sensor_read_center(3,&center);
+        dyn_sensor_read_left(3,&left);
+        dyn_sensor_read_right(3,&right);
+        printf("\n\n\nMOTORS MOVING AT LEFT %u i RIGHT %u\nOBJECTS AT LEFT %u  CENTER %u  RIGHT %u\n",motorl,motorr,left,center,right);
+
+
+        if(left<10 || !straight){
+            straight = true;
+            addSpeed(DYN_ID_MOTORR);
+        }
+        if(center<5){
+            if(motorl<102){
+                addSpeed(DYN_ID_MOTORL);
+            }else{
+                subSpeed(DYN_ID_MOTORR);
+            }
+        }
+
+        if(center>10){
+            if(motorr<102) {
+                addSpeed(DYN_ID_MOTORR);
+            }else{
+                subSpeed(DYN_ID_MOTORL);
+            }
+        }
+
+    }
+
+
+}
+
 void findWall(){
-    uint8_t* centerr;
-    (*centerr) = 20;
+    uint8_t center;
+    uint8_t right;
+    uint8_t left;
+
 
     acelerate(true,10);
-    printf("\n\n\nMoving straight\n");
+    usleep(1000000);
+    printf("\n\n\nMOVING TO A WALL\n");
     while(1){
-        dyn_sensor_read_center(3,centerr);
-
-        printf("DISTANCE CENTER%d: ",*centerr );
-        if(*centerr<10){
-
-            printf("\nPOTATO\n");
+        dyn_sensor_read_center(3,&center);
+        printf("\n\n\nDISTANCE CENTER:   %d\n",center );
+        if(center<11){
+            return;
         }
     }
 
@@ -180,19 +239,16 @@ void littleRight(){
 }
 
 void move(){
-    printf("\n\n\n Movement starting\n");
+    printf("\n\n\nMOVEMENT STARTING\n");
     uint8_t* center;
     uint8_t* right;
     uint8_t* left;
+
     //Comprovem que estigui quiet
     dyn_move(DYN_ID_MOTORL,0,false);
     dyn_move(DYN_ID_MOTORR,0,false);
 
-    printf("\n\n\n Going to find a wall\n");
     findWall();
-
-
-
-
+    adhere();
 }
 

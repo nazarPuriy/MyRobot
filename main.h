@@ -17,6 +17,7 @@
 #define DEBUG_LEVEL 3
 void acelerate(bool more,int quantity);
 void findWall();
+void adhere();
 void littleLeft();
 void littleRight();
 void move();

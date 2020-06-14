@@ -13,6 +13,7 @@
 
 #include "hal_dyn_uart/hal_dyn_uart_emu.h"
 #include "fake_msp.h"
+#include "dyn_instr.h"
 
 #define f_TxUAC2 TxUAC2_emu
 #define f_Sentit_Dades_Tx Sentit_Dades_Tx_emu
@@ -31,7 +32,7 @@
 
 #endif
 
-//TxPacket()  3 paràmetres: ID del Dynamixel, Mida dels paràmetres, Instruction byte. torna la mida del "Return packet"
+//TxPacket()  3 parï¿½metres: ID del Dynamixel, Mida dels parï¿½metres, Instruction byte. torna la mida del "Return packet"
 byte TxPacket(byte bID, byte bParameterLength, byte bInstruction,
               const byte *Parametros) {
     byte bCount, bCheckSum, bPacketLength;
@@ -39,31 +40,39 @@ byte TxPacket(byte bID, byte bParameterLength, byte bInstruction,
     f_Sentit_Dades_Tx();  //El pin P3.0 (DIRECTION_PORT) el posem a 1 (Transmetre)
     TxBuffer[0] = 0xff;    //Primers 2 bytes que indiquen inici de trama FF, FF.
     TxBuffer[1] = 0xff;
-    TxBuffer[2] = bID;         //ID del mòdul al que volem enviar el missatge
+    TxBuffer[2] = bID;         //ID del mï¿½dul al que volem enviar el missatge
     TxBuffer[3] = bParameterLength + 2; //Length(Parameter,Instruction,Checksum)
-    TxBuffer[4] = bInstruction;    //Instrucció que enviem al Mòdul
+    TxBuffer[4] = bInstruction;    //Instrucciï¿½ que enviem al Mï¿½dul
 
-    //TODO: La instrucció no ha de poder modificar les primeres 5 posicions de memoria
+    //Mirem si volem escriure
+    if(bInstruction==DYN_INSTR__WRITE){
+        //Mirem si Ã©s en una de les caselles no permeses o que no ens interessa modificar.
+        uint8_t adr = Parametros[0];
+        if(adr <= 5){
+            //Tornem ja que no volem modificar aquestes funcions.
+            return 1;
+        }
+    }
 
-    for (bCount = 0; bCount < bParameterLength; bCount++) //Comencem a generar la trama que hem d’enviar
+    for (bCount = 0; bCount < bParameterLength; bCount++) //Comencem a generar la trama que hem dï¿½enviar
     {
         TxBuffer[bCount + 5] = Parametros[bCount];
     }
     bCheckSum = 0;
     bPacketLength = bParameterLength + 4 + 2;
-    for (bCount = 2; bCount < bPacketLength - 1; bCount++) //Càlcul del checksum
+    for (bCount = 2; bCount < bPacketLength - 1; bCount++) //Cï¿½lcul del checksum
     {
         bCheckSum += TxBuffer[bCount];
     }
     TxBuffer[bCount] = ~bCheckSum;         //Escriu el Checksum (complement a 1)
-    for (bCount = 0; bCount < bPacketLength; bCount++) //Aquest bucle és el que envia la trama al Mòdul Robot
+    for (bCount = 0; bCount < bPacketLength; bCount++) //Aquest bucle ï¿½s el que envia la trama al Mï¿½dul Robot
     {
         while (!(UCA2IFG & UCTXIFG));
         f_TxUAC2(TxBuffer[bCount]);
     }
     while ((UCA2STATW & UCBUSY)) {
-    };   //Espera fins que s’ha transmès el últim byte
-    f_Sentit_Dades_Rx(); //Posem la línia de dades en Rx perquè el mòdul Dynamixel envia resposta
+    };   //Espera fins que sï¿½ha transmï¿½s el ï¿½ltim byte
+    f_Sentit_Dades_Rx(); //Posem la lï¿½nia de dades en Rx perquï¿½ el mï¿½dul Dynamixel envia resposta
     return (bPacketLength);
 }
 
@@ -83,7 +92,21 @@ struct RxReturn RxPacket(void) {
             f_rx_uart_byte(&respuesta);
         } //fin del for
     }
-    //TODO: Decode packet and verify checksum
+    uint8_t chk_sum = 0;
+    int i = 0;
+    for (i= 2; i < respuesta.StatusPacket[3] + 4; i++) //Cï¿½lcul del checksum
+    {
+        chk_sum += respuesta.StatusPacket[i];
+    }
+    chk_sum = ~chk_sum;
+
+    //calc_checksum = calc_chk_sum_ret(respuesta.StatusPacket);
+    //+4 ja que el paquet contÃ¨ les FF inicials la id i la length.
+    if(chk_sum != respuesta.StatusPacket[respuesta.StatusPacket[3]-1+4]){
+        respuesta.tx_err = true;
+    }else{
+        respuesta.tx_err = false;
+    }
 
     return respuesta;
 }
