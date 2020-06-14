@@ -167,48 +167,155 @@ void acelerate(bool more,int quantity){
 
 
 void adhere(){
+    //Usaremos para determinar si estamos cerca o lejos de la izquierda
+    int lejos = 9;
+    int cerca = 8;
+    int cerca2 = 15;
+
+    //Para detectar donde estan los objetos actualmente
     uint8_t center;
     uint8_t right;
     uint8_t left;
+
+    //Para detectar donde estaban los objetos en la posición anterior.
+    uint8_t centerAnt;
+    uint8_t rightAnt;
+    uint8_t leftAnt;
+
+    //Para detectar la velocidad de los motores.
     uint16_t motorl;
     uint16_t motorr;
     bool dirr;
     bool dirl;
-    bool straight;
+
+    //Positivo indica que nos hemos alejado esa distancia del obstucalo.
+    int leftDistance;
+    int rightDistance;
+    int centerDistance;
+
+    //Indican a que lado estamos girando.
+    bool rotatingLeft;
+    bool rotatingRight;
+    bool rotatingStraight;
+
+    //Per tal de que giri lleugerament a l'esquerra al principi.
+    bool start = true;
     subSpeed(DYN_ID_MOTORR);
-    bool willsmith;
-    while(willsmith){
+    subSpeed(DYN_ID_MOTORR);
+
+    bool willsmith = true;
+    while(willsmith) {
         dyn_motor_read_speed(DYN_ID_MOTORL, &motorl, &dirl);
         dyn_motor_read_speed(DYN_ID_MOTORR, &motorr, &dirr);
-        dyn_sensor_read_center(3,&center);
-        dyn_sensor_read_left(3,&left);
-        dyn_sensor_read_right(3,&right);
-        printf("\n\n\nMOTORS MOVING AT LEFT %u i RIGHT %u\nOBJECTS AT LEFT %u  CENTER %u  RIGHT %u\n",motorl,motorr,left,center,right);
-
-
-        if(left<10 || !straight){
-            straight = true;
-            addSpeed(DYN_ID_MOTORR);
-        }
-        if(center<5){
-            if(motorl<102){
-                addSpeed(DYN_ID_MOTORL);
-            }else{
-                subSpeed(DYN_ID_MOTORR);
-            }
-        }
-
-        if(center>10){
-            if(motorr<102) {
+        dyn_sensor_read_center(3, &center);
+        dyn_sensor_read_left(3, &left);
+        dyn_sensor_read_right(3, &right);
+        printf("\n\n\nMOTORS MOVING AT LEFT %u i RIGHT %u\nOBJECTS AT LEFT %u  CENTER %u  RIGHT %u\n", motorl, motorr,
+               left, center, right);
+        if(start){
+            printf("\n\n\nSTART\n");
+            if(left<9){
                 addSpeed(DYN_ID_MOTORR);
+                addSpeed(DYN_ID_MOTORR);
+                start = false;
+            }
+
+        }else{
+            printf("\n\n\nELSE\n");
+            //Si postitiu ens hem allunyat
+            leftDistance=left-leftAnt;
+            rightDistance=right-rightAnt;
+            centerDistance=center-centerAnt;
+            rotatingLeft = false;
+            rotatingRight = false;
+            rotatingStraight = false;
+            if(motorl==motorr){
+                rotatingStraight = true;
+            }else if(motorr>motorl){
+                rotatingLeft = true;
             }else{
-                subSpeed(DYN_ID_MOTORL);
+                rotatingRight = true;
+            }
+
+            //Un cop tenim totes les variables que ens indiquen que estem fent anem a actuar.
+
+            //Si estem massa aprop. Girem dreta o augmentem velocitat roda esquerra.
+            if(left<cerca || center<cerca2){
+                printf("\n\n\nAlgun massa aprop %d\n", leftDistance);
+                //Si no ens estem allunyant
+                if(!(leftDistance>0)){
+                    //Mirem de no girar massa.
+                    if(motorl-motorr<20){
+                        //Estamos girando izq, hay que ir recto. Ponemos rueda izq a derecha.
+                        printf("A");
+                        if(rotatingLeft){
+                            printf("C");
+                            dyn_move(DYN_ID_MOTORL,motorr,false);
+                            motorl=motorr;
+                        }
+                        if(motorl<102){
+                            printf("B + %u",motorl);
+                            addSpeed(DYN_ID_MOTORL);
+                        }else{
+                            subSpeed(DYN_ID_MOTORR);
+                        }
+                    }
+                }else{
+                    if(motorr>motorl){
+                        dyn_move(DYN_ID_MOTORL,motorr,false);
+                    }else{
+                        dyn_move(DYN_ID_MOTORR,motorl,false);
+                    }
+                }
+
+
+
+            //Si estem massa lluny. Ens apropem, girant esquerra o més velocitat dreta.
+            }else if(left>lejos && !(center<cerca2)){
+                printf("\n\nEsquerra massa lluny centre bé\n");
+                    //Si ens estem allunyant.
+                    if(leftDistance>=0){
+                    printf("\nKUSKUS");
+                    //Mirem que no estiguem girant massa rápud.
+                    if(motorr-motorl<20){
+                        printf("\nKUSKUS2");
+                        //Estem girant dreta. Hem de ficar roda dreta a velocitat de l'esquerra.
+                        if (rotatingRight) {
+                            printf("\nKUSKUS3");
+                            dyn_move(DYN_ID_MOTORR, motorl, false);
+                            motorr = motorl;
+                        }
+                        if (motorr < 102) {
+                            printf("\nKUSKUS4");
+                            addSpeed(DYN_ID_MOTORR);
+                        } else {
+                            printf("\nKUSKUS5");
+                            subSpeed(DYN_ID_MOTORL);
+                        }
+
+                    }
+                }else{
+                    if(motorr>motorl){
+                        dyn_move(DYN_ID_MOTORL,motorr,false);
+                    }else{
+                        dyn_move(DYN_ID_MOTORR,motorl,false);
+                    }
+                    }
+
+            }else{
+                if(motorr>motorl){
+                    dyn_move(DYN_ID_MOTORL,motorr,false);
+                }else{
+                    dyn_move(DYN_ID_MOTORR,motorl,false);
+                }
+
             }
         }
 
+        centerAnt = center;
+        leftAnt = left;
+        rightAnt = right;
     }
-
-
 }
 
 void findWall(){
@@ -217,8 +324,7 @@ void findWall(){
     uint8_t left;
 
 
-    acelerate(true,10);
-    usleep(1000000);
+    acelerate(true,8);
     printf("\n\n\nMOVING TO A WALL\n");
     while(1){
         dyn_sensor_read_center(3,&center);
