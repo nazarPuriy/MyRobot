@@ -168,9 +168,9 @@ void acelerate(bool more,int quantity){
 
 void adhere(){
     //Usaremos para determinar si estamos cerca o lejos de la izquierda
-    int lejos = 9;
-    int cerca = 8;
-    int cerca2 = 15;
+    int lejos = 8;
+    int cerca = 7;
+    int cerca2 = 18;
 
     //Para detectar donde estan los objetos actualmente
     uint8_t center;
@@ -324,7 +324,7 @@ void findWall(){
     uint8_t left;
 
 
-    acelerate(true,8);
+    acelerate(true,10);
     printf("\n\n\nMOVING TO A WALL\n");
     while(1){
         dyn_sensor_read_center(3,&center);

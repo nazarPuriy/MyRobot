@@ -10,7 +10,7 @@
  */
 uint16_t VEL_MAX = 1023; //Velocitat màxima deguda a que utilitzem 10 bits per declarar aquesta.
 uint8_t VEL_MIN = 1; //Velocitat mínima per no entrar en el mode defiinit a 0.
-uint8_t VEL_CHANGE=13;
+uint8_t VEL_CHANGE=10;
 
 /**
  * Turn on a continous moving of the robot straight ahead or backwards
