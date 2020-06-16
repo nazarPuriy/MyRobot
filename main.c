@@ -169,7 +169,7 @@ void acelerate(bool more,int quantity){
 
 void adhere(){
     //Usaremos para determinar si estamos cerca o lejos de la izquierda
-    int lejos = 9;
+    int lejos = 8;
     int cerca = 6;
     int cerca2 = 18;
 
@@ -199,6 +199,16 @@ void adhere(){
     bool rotatingRight;
     bool rotatingStraight;
 
+    //Per indicar que estem reseguint la pared
+    int steps = 0;
+    bool following;
+    bool followed;
+
+    //Per indicar que acabem de girar a l'esquerra
+    bool added = false;//Per indicar que ja estem fent aquest gir.
+    int steps2=0;
+    bool turnedLeft;
+
     //Per tal de que giri lleugerament a l'esquerra al principi.
     bool start = true;
     subSpeed(DYN_ID_MOTORR);
@@ -219,8 +229,9 @@ void adhere(){
                 addSpeed(DYN_ID_MOTORR);
                 addSpeed(DYN_ID_MOTORR);
                 start = false;
+                following = true;
+                followed = false;
             }
-
         }else{
             printf("\n\n\nELSE\n");
             //Si postitiu ens hem allunyat
@@ -240,11 +251,12 @@ void adhere(){
 
             //Un cop tenim totes les variables que ens indiquen que estem fent anem a actuar.
 
+
             //Si estem massa aprop. Girem dreta o augmentem velocitat roda esquerra.
             if(left<cerca || center<cerca2){
                 printf("\n\n\nAlgun massa aprop %d\n", leftDistance);
-                //Si no ens estem allunyant
-                if(!(leftDistance>0)){
+                //Si no ens estem allunyant o ens allunyem pero encara estem massa aprop
+                if(!(leftDistance>0)||(leftDistance>0&&(left<4||center<4))){
                     //Mirem de no girar massa.
                     if(motorl-motorr<20){
                         //Estamos girando izq, hay que ir recto. Ponemos rueda izq a derecha.
@@ -275,7 +287,7 @@ void adhere(){
             }else if(left>lejos && !(center<cerca2)){
                 printf("\n\nEsquerra massa lluny centre bé\n");
                     //Si ens estem allunyant.
-                    if(leftDistance>=0){
+                    if(leftDistance>=0||(!leftDistance&&left>9)){
                     printf("\nKUSKUS");
                     //Mirem que no estiguem girant massa rápud.
                     if(motorr-motorl<20){
@@ -311,6 +323,7 @@ void adhere(){
                 }
 
             }
+
         }
 
         centerAnt = center;
