@@ -138,8 +138,9 @@ void acelerate(bool more,int quantity){
         dyn_sensor_read_center(3,&center);
         //Mirem sempre que no anem a col·lisionar.
         if(center<10){
-            dyn_move(DYN_ID_MOTORL,0,false);
-            dyn_move(DYN_ID_MOTORR,0,false);
+            printf("\n\n\n ACELERATION NOT COMPLETED");
+            dyn_move(DYN_ID_MOTORL,40,false);
+            dyn_move(DYN_ID_MOTORR,40,false);
             return;
         }
 
@@ -168,8 +169,8 @@ void acelerate(bool more,int quantity){
 
 void adhere(){
     //Usaremos para determinar si estamos cerca o lejos de la izquierda
-    int lejos = 8;
-    int cerca = 7;
+    int lejos = 9;
+    int cerca = 6;
     int cerca2 = 18;
 
     //Para detectar donde estan los objetos actualmente
